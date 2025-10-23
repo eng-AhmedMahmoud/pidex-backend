@@ -13,11 +13,12 @@ export default {
     }
 
     try {
-      // Check if identifier is email or username
       const identifier = username.toLowerCase();
+      let user = null;
+      let isAdminUser = false;
 
-      // Find user by username or email
-      const user = await strapi.query('plugin::users-permissions.user').findOne({
+      // First, try to find in regular users (plugin::users-permissions.user)
+      user = await strapi.query('plugin::users-permissions.user').findOne({
         where: {
           $or: [
             { username: identifier },
@@ -26,6 +27,23 @@ export default {
         },
         populate: ['role']
       });
+
+      // If not found, try admin users (admin::user)
+      if (!user) {
+        const adminUser = await strapi.query('admin::user').findOne({
+          where: {
+            $or: [
+              { username: identifier },
+              { email: identifier }
+            ]
+          }
+        });
+
+        if (adminUser) {
+          user = adminUser;
+          isAdminUser = true;
+        }
+      }
 
       if (!user) {
         ctx.status = 400;
@@ -37,10 +55,19 @@ export default {
       }
 
       // Verify password
-      const validPassword = await strapi
-        .plugin('users-permissions')
-        .service('user')
-        .validatePassword(password, user.password);
+      let validPassword = false;
+
+      if (isAdminUser) {
+        // For admin users, use admin auth service
+        const adminAuthService = strapi.admin.services.auth;
+        validPassword = await adminAuthService.validatePassword(password, user.password);
+      } else {
+        // For regular users, use users-permissions service
+        validPassword = await strapi
+          .plugin('users-permissions')
+          .service('user')
+          .validatePassword(password, user.password);
+      }
 
       if (!validPassword) {
         ctx.status = 400;
@@ -51,8 +78,8 @@ export default {
         });
       }
 
-      // Check if user is blocked
-      if (user.blocked) {
+      // Check if user is blocked (only for regular users)
+      if (!isAdminUser && user.blocked) {
         ctx.status = 400;
         return ctx.send({
           success: false,
@@ -75,8 +102,8 @@ export default {
           token: jwt,
           user: {
             id: user.id.toString(),
-            username: user.username,
-            role: user.role?.name || 'authenticated',
+            username: user.username || user.email,
+            role: isAdminUser ? 'admin' : (user.role?.name || 'authenticated'),
             email: user.email
           }
         }
