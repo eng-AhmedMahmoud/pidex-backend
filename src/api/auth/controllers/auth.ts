@@ -16,6 +16,8 @@ export default {
       // Check if identifier is email or username
       const identifier = username.toLowerCase();
 
+      strapi.log.info(`🔍 Login attempt for: ${identifier}`);
+
       // Find user by username or email in regular users table
       const user = await strapi.query('plugin::users-permissions.user').findOne({
         where: {
@@ -27,7 +29,19 @@ export default {
         populate: ['role']
       });
 
+      strapi.log.info(`👤 User found: ${user ? 'YES' : 'NO'}`);
+      if (user) {
+        strapi.log.info(`👤 User details: username=${user.username}, email=${user.email}, blocked=${user.blocked}`);
+      }
+
       if (!user) {
+        // Let's also check all users to debug
+        const allUsers = await strapi.query('plugin::users-permissions.user').findMany({
+          limit: 10
+        });
+        strapi.log.info(`📊 Total users in database: ${allUsers.length}`);
+        allUsers.forEach(u => strapi.log.info(`   - ${u.username} (${u.email})`));
+
         ctx.status = 400;
         return ctx.send({
           success: false,
@@ -38,7 +52,9 @@ export default {
 
       // Verify password using bcrypt directly (more reliable)
       const bcrypt = require('bcryptjs');
+      strapi.log.info(`🔐 Verifying password for user: ${user.username}`);
       const validPassword = await bcrypt.compare(password, user.password);
+      strapi.log.info(`🔐 Password valid: ${validPassword ? 'YES' : 'NO'}`);
 
       if (!validPassword) {
         ctx.status = 400;
