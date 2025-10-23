@@ -1,0 +1,37 @@
+{
+  "collectionName": "components_product_reviews",
+  "info": {
+    "displayName": "Review",
+    "description": "Product review with multi-language support"
+  },
+  "options": {},
+  "attributes": {
+    "author": {
+      "type": "string",
+      "required": true
+    },
+    "authorAr": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "decimal",
+      "required": true,
+      "min": 0,
+      "max": 5
+    },
+    "comment": {
+      "type": "text",
+      "required": true
+    },
+    "commentAr": {
+      "type": "text"
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "date": {
+      "type": "datetime"
+    }
+  }
+}

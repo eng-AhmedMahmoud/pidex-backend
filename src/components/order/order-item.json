@@ -1,0 +1,38 @@
+{
+  "collectionName": "components_order_items",
+  "info": {
+    "displayName": "Order Item",
+    "description": "Individual item in an order"
+  },
+  "options": {},
+  "attributes": {
+    "product": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product.product"
+    },
+    "productId": {
+      "type": "string"
+    },
+    "productName": {
+      "type": "string"
+    },
+    "productNameAr": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer",
+      "required": true,
+      "min": 1,
+      "default": 1
+    },
+    "price": {
+      "type": "decimal",
+      "min": 0
+    },
+    "total": {
+      "type": "decimal",
+      "min": 0
+    }
+  }
+}

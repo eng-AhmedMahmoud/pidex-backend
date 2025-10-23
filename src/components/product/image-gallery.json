@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_product_image_galleries",
+  "info": {
+    "displayName": "Image Gallery",
+    "description": "Product image with main image flag"
+  },
+  "options": {},
+  "attributes": {
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": ["images"]
+    },
+    "url": {
+      "type": "string"
+    },
+    "isMain": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
