@@ -56,12 +56,6 @@
       "target": "api::category.category",
       "inversedBy": "products"
     },
-    "categoryName": {
-      "type": "string"
-    },
-    "categoryNameAr": {
-      "type": "string"
-    },
     "rating": {
       "type": "decimal",
       "default": 0,
