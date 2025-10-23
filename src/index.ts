@@ -17,6 +17,59 @@ export default {
    * run jobs, or perform some special logic.
    */
   async bootstrap({ strapi }) {
+    // Create frontend dashboard user from environment variables
+    const adminUsername = process.env.ADMIN_USERNAME || 'pidexadmin';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'pidex@123';
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@pidex-store.com';
+
+    try {
+      strapi.log.info('🔧 Checking for frontend dashboard user...');
+
+      // Check if user already exists
+      const existingUser = await strapi.query('plugin::users-permissions.user').findOne({
+        where: {
+          username: adminUsername
+        }
+      });
+
+      if (!existingUser) {
+        strapi.log.info(`🔧 Creating frontend dashboard user: ${adminUsername}`);
+
+        // Get the "authenticated" role
+        const authenticatedRole = await strapi.query('plugin::users-permissions.role').findOne({
+          where: { type: 'authenticated' }
+        });
+
+        if (!authenticatedRole) {
+          strapi.log.error('❌ Authenticated role not found!');
+        } else {
+          // Hash the password using bcrypt directly
+          const bcrypt = require('bcryptjs');
+          const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+          // Create the user
+          const newUser = await strapi.entityService.create('plugin::users-permissions.user', {
+            data: {
+              username: adminUsername,
+              email: adminEmail,
+              password: hashedPassword,
+              role: authenticatedRole.id,
+              confirmed: true,
+              blocked: false
+            }
+          });
+
+          strapi.log.info(`✅ Frontend dashboard user created successfully!`);
+          strapi.log.info(`   Username: ${newUser.username}`);
+          strapi.log.info(`   Email: ${newUser.email}`);
+        }
+      } else {
+        strapi.log.info(`ℹ️  Frontend dashboard user already exists: ${existingUser.username}`);
+      }
+    } catch (error) {
+      strapi.log.error('❌ Error managing frontend dashboard user:', error);
+    }
+
     // Configure public permissions for API access
     try {
       strapi.log.info('🔧 Configuring public API permissions...');
