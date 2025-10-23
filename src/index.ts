@@ -43,16 +43,12 @@ export default {
         if (!authenticatedRole) {
           strapi.log.error('❌ Authenticated role not found!');
         } else {
-          // Hash the password using bcrypt directly
-          const bcrypt = require('bcryptjs');
-          const hashedPassword = await bcrypt.hash(adminPassword, 10);
-
-          // Create the user
+          // Create the user with plain password - Strapi will hash it automatically via lifecycle hooks
           const newUser = await strapi.entityService.create('plugin::users-permissions.user', {
             data: {
               username: adminUsername,
               email: adminEmail,
-              password: hashedPassword,
+              password: adminPassword, // Plain password - Strapi hashes it automatically
               role: authenticatedRole.id,
               confirmed: true,
               blocked: false
@@ -65,6 +61,16 @@ export default {
         }
       } else {
         strapi.log.info(`ℹ️  Frontend dashboard user already exists: ${existingUser.username}`);
+        strapi.log.info(`🔄 Updating password to fix double-hashing issue...`);
+        
+        // Update the password to fix any double-hashing issues from previous deployments
+        await strapi.entityService.update('plugin::users-permissions.user', existingUser.id, {
+          data: {
+            password: adminPassword, // Plain password - Strapi will hash it correctly
+          }
+        });
+        
+        strapi.log.info(`✅ Password updated successfully for user: ${existingUser.username}`);
       }
     } catch (error) {
       strapi.log.error('❌ Error managing frontend dashboard user:', error);
