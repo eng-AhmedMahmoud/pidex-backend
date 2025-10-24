@@ -1,0 +1,95 @@
+{
+  "kind": "collectionType",
+  "collectionName": "products",
+  "info": {
+    "singularName": "product",
+    "pluralName": "products",
+    "displayName": "Product",
+    "description": "E-commerce products with multi-language support"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "nameAr": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "required": true
+    },
+    "descriptionAr": {
+      "type": "text",
+      "required": true
+    },
+    "features": {
+      "type": "json",
+      "default": []
+    },
+    "featuresAr": {
+      "type": "json",
+      "default": []
+    },
+    "priceCurrentValue": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "priceOldValue": {
+      "type": "decimal",
+      "min": 0
+    },
+    "imageGallery": {
+      "type": "component",
+      "repeatable": true,
+      "component": "product.image-gallery"
+    },
+    "category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::category.category",
+      "inversedBy": "products"
+    },
+    "categoryName": {
+      "type": "string"
+    },
+    "categoryNameAr": {
+      "type": "string"
+    },
+    "rating": {
+      "type": "decimal",
+      "default": 0,
+      "min": 0,
+      "max": 5
+    },
+    "reviewCount": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "productReviews": {
+      "type": "component",
+      "repeatable": true,
+      "component": "product.review"
+    },
+    "commonlyBoughtTogether": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::product.product"
+    },
+    "inStock": {
+      "type": "boolean",
+      "default": true
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
